@@ -260,10 +260,12 @@ ping 192.168.100.3
 
 **LIVRABLES : captures d'écran des routes des deux machines et de votre nouvelle tentative de ping.**
 
+Tentative de ping:
+
 ![](figures/2_ping_default-routes-no-rule)
 
-![](figures/2_route-client.png)
-![](figures/2_route-server.png)
+![](figures/2_route_client.png)
+![](figures/2_route_server.png)
 
 ---
 
@@ -279,10 +281,7 @@ Si votre ping passe mais que la réponse contient un _Redirect Host_, ceci indiq
 
 ---
 
-
-**LIVRABLE : capture d'écran de votre ping vers l'Internet. Un ping qui ne passe pas ou des réponses containant des _Redirect Host_ sont acceptés.**o
-
-![](figures/3_ping_internet_no-rule.png)
+**LIVRABLE : capture d'écran de votre ping vers l'Internet. Un ping qui ne passe pas ou des réponses containant des _Redirect Host_ sont acceptés.**
 
 ---
 

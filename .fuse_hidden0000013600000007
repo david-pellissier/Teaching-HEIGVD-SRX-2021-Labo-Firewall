@@ -260,9 +260,12 @@ ping 192.168.100.3
 
 **LIVRABLES : captures d'écran des routes des deux machines et de votre nouvelle tentative de ping.**
 
+Tentative de ping:
+
 ![](figures/2_ping_default-routes-no-rule)
 
 ![](figures/2_route-client.png)
+
 ![](figures/2_route-server.png)
 
 ---
@@ -277,12 +280,10 @@ ping 8.8.8.8
 
 Si votre ping passe mais que la réponse contient un _Redirect Host_, ceci indique que votre ping est passé grace à la redirection ICMP, mais que vous n'arrivez pas encore à contacter l'Internet à travers de Firewall. Ceci est donc aussi valable pour l'instant et accepté comme résultat.
 
----
+---:w
 
 
-**LIVRABLE : capture d'écran de votre ping vers l'Internet. Un ping qui ne passe pas ou des réponses containant des _Redirect Host_ sont acceptés.**o
-
-![](figures/3_ping_internet_no-rule.png)
+**LIVRABLE : capture d'écran de votre ping vers l'Internet. Un ping qui ne passe pas ou des réponses containant des _Redirect Host_ sont acceptés.**
 
 ---
 

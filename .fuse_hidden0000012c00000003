@@ -91,7 +91,7 @@ Les adresses IP sont définies dans le schéma ci-dessous :
 Avant de configurer les règles, il est primordial de connaître les besoins de notre réseau. Ceci afin de laisser passer les flux légitimes lors de la rédaction des règles.
 
 Le but du **LAN** est de fournir aux utilisateurs de votre réseau un accès à Internet ; à certains services de base uniquement en empêchant les connexions provenant de l'extérieur. Il faudra tout de même laisser entrer les paquets répondants aux requêtes de notre LAN. Une seule machine est présente sur ce réseau. Il s’agit de la machine dont le nom est **Client\_In\_LAN**. (il est très facile de rajouter de machines supplémentaires sur le LAN utilisant Docker).
-__
+
 La **DMZ** est un réseau réservé aux serveurs que l'on veut rendre accessibles depuis l'extérieur et l’intérieur de notre réseau. Par exemple, si nous voulons publier un site web que l'on héberge, il faut accepter des connexions sur le serveur web; dans ce cas, nous ne pouvons pas le placer dans le LAN, cela constituerait un risque. Nous accepterons donc les connexions entrantes dans la DMZ, mais seulement pour les services que l'on désire offrir. Le serveur Web situé dans la DMZ est simulé par la machine **Server\_In\_DMZ**.
 
 Le **WAN** n'est que l'accès à Internet. Il est connecté au réseau de l'école ou à votre propre à travers le système de réseau fourni par Docker.
@@ -188,7 +188,6 @@ Afin de simplifier vos manipulations, les conteneurs ont été configurées avec
 - Client\_in\_LAN
 - Server\_in\_DMZ
 
-__
 Pour accéder au terminal de l’une des machines, il suffit de taper :
 
 ```bash
@@ -207,7 +206,6 @@ Vous pouvez bien évidemment lancer des terminaux avec les trois machines en mê
 ## Configuration de base
 
 La plupart de paramètres sont déjà configurés correctement sur les trois machines. Il est pourtant nécessaire de rajouter quelques commandes afin de configurer correctement le réseau pour le labo.
-
 
 Vous pouvez commencer par vérifier que le ping n'est pas possible actuellement entre les machines. Depuis votre Client\_in\_LAN, essayez de faire un ping sur le Server\_in\_DMZ (cela ne devrait pas fonctionner !) :
 
@@ -237,7 +235,6 @@ ip route add default via 192.168.100.2
 
 ### Configuration du serveur dans la DMZ
 
-__
 Dans un terminal de votre serveur dans DMZ, taper les commandes suivantes :
 
 ```bash
@@ -260,10 +257,9 @@ ping 192.168.100.3
 
 **LIVRABLES : captures d'écran des routes des deux machines et de votre nouvelle tentative de ping.**
 
-![](figures/2_ping_default-routes-no-rule)
+Tentative de ping:
 
-![](figures/2_route-client.png)
-![](figures/2_route-server.png)
+![](figures/2_*)
 
 ---
 
@@ -279,10 +275,7 @@ Si votre ping passe mais que la réponse contient un _Redirect Host_, ceci indiq
 
 ---
 
-
-**LIVRABLE : capture d'écran de votre ping vers l'Internet. Un ping qui ne passe pas ou des réponses containant des _Redirect Host_ sont acceptés.**o
-
-![](figures/3_ping_internet_no-rule.png)
+**LIVRABLE : capture d'écran de votre ping vers l'Internet. Un ping qui ne passe pas ou des réponses containant des _Redirect Host_ sont acceptés.**
 
 ---
 
