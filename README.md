@@ -125,12 +125,15 @@ _Lors de la définition d'une zone, spécifier l'adresse du sous-réseau IP avec
 Rappel: ICMP 0 = response, ICMP 8 = request
 
 (Tableau provisoire, il faudra utiliser des adresses IP dans le rendu)
+LAN = 192.168.100.0/24
+WAN = 172.17.0.2/16
+DMZ = 192.168.200.0/24
 
 | Adresse IP source | Adresse IP destination | Type      | Port src | Port dst | Action |
 | :---:             | :---:                  | :---:     | :------: | :------: | :----: |
 | LAN               | WAN                    | TCP + UDP |  *       |  53      | Accept |
 | WAN               | LAN                    | ICMP 0    |  -       |  -       | Accept |
-| LAN               | WAN                    | ICMP 8    |  -       |  -       | Accept |      |
+| LAN               | WAN                    | ICMP 8    |  -       |  -       | Accept |      
 | LAN               | WAN                    | TCP       |    *     | 80, 8080 | Accept | 
 | LAN               | WAN                    | TCP       |    *     | 443      | Accept |
 | LAN, WAN          | WebServer DMZ          | TCP       |    *     | 80       | Accept |
@@ -141,7 +144,7 @@ Rappel: ICMP 0 = response, ICMP 8 = request
 ---
 
 # Installation de l’environnement virtualisé
-
+:
 Ce chapitre indique comment installer l'environnement. Il se base sur des outils gratuits, téléchargeables sur Internet.
 
 ## Matériel
@@ -362,6 +365,12 @@ Commandes iptables :
 
 ```bash
 LIVRABLE : Commandes iptables
+
+iptables -P INPUT DROP
+iptables -P OUTPUT DROP
+iptables -P FORWARD DROP
+
+iptables -
 ```
 ---
 
