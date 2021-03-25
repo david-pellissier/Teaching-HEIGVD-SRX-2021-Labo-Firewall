@@ -134,6 +134,12 @@ DMZ = 192.168.200.0/24
 | LAN               | WAN                    | TCP + UDP |  *       |  53      | Accept |
 | WAN               | LAN                    | ICMP 0    |  -       |  -       | Accept |
 | LAN               | WAN                    | ICMP 8    |  -       |  -       | Accept |      
+| DMZ               | LAN                    | ICMP 0    |  -       |  -       | Accept |
+| LAN               | DMZ                    | ICMP 8    |  -       |  -       | Accept |      
+| LAN               | DMZ                    | ICMP 0    |  -       |  -       | Accept |
+| DMZ               | LAN                    | ICMP 8    |  -       |  -       | Accept |      
+| LAN               | WAN                    | TCP       |    *     | 80, 8080 | Accept | 
+| LAN               | WAN                    | TCP       |    *     | 80, 8080 | Accept | 
 | LAN               | WAN                    | TCP       |    *     | 80, 8080 | Accept | 
 | LAN               | WAN                    | TCP       |    *     | 443      | Accept |
 | LAN, WAN          | WebServer DMZ          | TCP       |    *     | 80       | Accept |
@@ -370,7 +376,7 @@ iptables -P INPUT DROP
 iptables -P OUTPUT DROP
 iptables -P FORWARD DROP
 
-iptables -
+iptables -A FORWARD -s
 ```
 ---
 
