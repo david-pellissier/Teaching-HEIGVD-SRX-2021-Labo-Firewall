@@ -125,9 +125,9 @@ _Lors de la définition d'une zone, spécifier l'adresse du sous-réseau IP avec
 Rappel: ICMP 0 = response, ICMP 8 = request
 
 (Tableau provisoire, il faudra utiliser des adresses IP dans le rendu)
-LAN = 192.168.100.0/24
-WAN = 172.17.0.2/16
-DMZ = 192.168.200.0/24
+LAN = 192.168.100.0/24, interface eth1
+WAN =
+DMZ = 192.168.200.0/24, interface eth0
 
 | Adresse IP source | Adresse IP destination | Type      | Port src | Port dst | Action |
 | :---:             | :---:                  | :---:     | :------: | :------: | :----: |
@@ -371,12 +371,19 @@ Commandes iptables :
 
 ```bash
 LIVRABLE : Commandes iptables
+WAN="172.17.0.0/16"
+LAN="192.168.100.0/24"
+DMZ="192.168.200.0/24"
+SRV="192.168.200.3/24"
+ILAN="eth1"
+IDMZ="eth0"
 
-iptables -P INPUT DROP
-iptables -P OUTPUT DROP
-iptables -P FORWARD DROP
+iptables -A FORWARD -s 192.168.200.0/24 -d 192.168.100.0/24 -p icmp --icmp-type 0 -j ACCEPT
+iptables -A FORWARD -s 192.168.200.0/24 -d 192.168.100.0/24 -p icmp --icmp-type 8 -j ACCEPT
+iptables -A FORWARD -s 192.168.100.0/24 -p icmp --icmp-type 8 -j ACCEPT
+iptables -A FORWARD -d 192.168.100.0/24 -p icmp --icmp-type 0 -j ACCEPT
 
-iptables -A FORWARD -s
+
 ```
 ---
 
@@ -396,7 +403,7 @@ Vérifiez aussi la route entre votre client et le service `8.8.8.8`. Elle devrai
 
 ```bash
 traceroute 8.8.8.8
-``` 	            
+``` 	          
 
 
 ---
@@ -453,6 +460,10 @@ Commandes iptables :
 
 ```bash
 LIVRABLE : Commandes iptables
+iptables -A FORWARD -i eth1 -s 192.168.100.0/24 -p tcp --dport 53 -j ACCEPT
+iptables -A FORWARD -i eth1 -s 192.168.100.0/24 -p udp --dport 53 -j ACCEPT
+iptables -A FORWARD -o eth1 -d 192.168.100.0/24 -p tcp --sport 53 -j ACCEPT
+iptables -A FORWARD -o eth1 -d 192.168.100.0/24 -p udp --sport 53 -j ACCEPT
 ```
 
 ---
@@ -477,7 +488,7 @@ LIVRABLE : Commandes iptables
 **Réponse**
 
 **LIVRABLE : Votre réponse ici...**
-
+iptables -A FORWARD -d 192.168.200.3/24 -o eth0 -p tcp --dport 80
 ---
 
 
@@ -497,6 +508,8 @@ Commandes iptables :
 
 ```bash
 LIVRABLE : Commandes iptables
+iptables -A FORWARD -i eth1 -s 192.168.100.0/24 -p tcp -m multiport --dports 80,8080,443 -j ACCEPT
+iptables -A FORWARD -o eth1 -d 192.168.100.0/24 -p tcp -m multiport --sports 8080,443 -j ACCEPT
 ```
 
 ---
@@ -537,6 +550,11 @@ Commandes iptables :
 
 ```bash
 LIVRABLE : Commandes iptables
+iptables -A INPUT -s $LAN -p tcp --dport 22 -j ACCEPT
+iptables -A OUTPUT -d $LAN -p tcp --sport 22 -j ACCEPT
+
+iptables -A FORWARD -s $LAN -i $ILAN -d $SRV -o $IDMZ -p tcp --dport 22 -j ACCEPT
+iptables -A FORWARD -s $SRV -i $IDMZ -d $LAN -o $ILAN -p tcp --sport 22 -j ACCEPT
 ```
 
 ---
@@ -563,6 +581,8 @@ ssh root@192.168.200.3
 
 **LIVRABLE : Votre réponse ici...**
 
+SSH permet de se connecter sur une machine de manière chiffrée, ce qui permet la maintenance facile de la machine distante.
+
 ---
 
 <ol type="a" start="10">
@@ -576,6 +596,7 @@ ssh root@192.168.200.3
 
 **LIVRABLE : Votre réponse ici...**
 
+Utiliser le port exact et le bon protocole pour SSH, car par exemple le port 22/UDP n'est pas SSH
 ---
 
 ## Règles finales iptables
