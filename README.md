@@ -1,3 +1,5 @@
+David Pellissier et Michael Ruckstuhl
+
 # Teaching-HEIGVD-SRX-2021-Laboratoire-Firewall
 
 **ATTENTION : Commencez par créer un Fork de ce repo et travaillez sur votre fork.**
@@ -121,24 +123,21 @@ _Lors de la définition d'une zone, spécifier l'adresse du sous-réseau IP avec
 
 ---
 
-**LIVRABLE : Remplir le tableau**
 Rappel: ICMP 0 = response, ICMP 8 = request
 
-
 - LAN = 192.168.100.0/24, interface eth1
-- WAN = 0.0.0.0/32
+- WAN = n'importe quelle adresse IP
 - DMZ = 192.168.200.0/24, interface eth0
 
 | Adresse IP source | Adresse IP destination | Type      | Port src | Port dst | Action |
 | :---:             | :---:                  | :---:     | :------: | :------: | :----: |
 | LAN               | WAN                    | TCP + UDP |  *       |  53      | Accept |
-| WAN               | LAN                    | TCP + UDP |  53      |  *      | Accept |
-| WAN               | LAN                    | ICMP 0    |  -       |  -       | Accept |
-| LAN               | WAN                    | ICMP 8    |  -       |  -       | Accept |      
-| DMZ               | LAN                    | ICMP 0    |  -       |  -       | Accept |
-| LAN               | DMZ                    | ICMP 8    |  -       |  -       | Accept |      
-| LAN               | DMZ                    | ICMP 0    |  -       |  -       | Accept |
-| DMZ               | LAN                    | ICMP 8    |  -       |  -       | Accept |      
+| WAN               | LAN                    | ICMP 0    |  *       |  *       | Accept |
+| LAN               | WAN                    | ICMP 8    |  *       |  *       | Accept |      
+| DMZ               | LAN                    | ICMP 0    |  *       |  *       | Accept |
+| LAN               | DMZ                    | ICMP 8    |  *       |  *       | Accept |      
+| LAN               | DMZ                    | ICMP 0    |  *       |  *       | Accept |
+| DMZ               | LAN                    | ICMP 8    |    *     |  *       | Accept |      
 | LAN               | WAN                    | TCP       |    *     | 80, 8080 | Accept |  
 | LAN               | WAN                    | TCP       |    *     | 443      | Accept |
 | LAN, WAN          | WebServer DMZ          | TCP       |    *     | 80       | Accept |
@@ -146,7 +145,11 @@ Rappel: ICMP 0 = response, ICMP 8 = request
 | LAN               | Firewall               | TCP       |    *     | 22       | Accept |
 |         *         |           *            |    *      |    *     |    *     | Drop   |
 
+Dans le tableau, pour les règles utilisant TCP/UDP, seul le sens d'initiation de la connexion est montré, 
+le retour est implicite. 
+
 Les règles par défaut sont configurées avec ces commandes:
+
 ```bash
 iptables -P FORWARD DROP
 iptables -P INPUT DROP
@@ -232,8 +235,6 @@ ping 192.168.200.3
 ```
 ---
 
-**LIVRABLE : capture d'écran de votre tentative de ping.**  
-
 ![Capture d'écran](figures/1_ping_before-config.png)
 
 ---
@@ -274,12 +275,17 @@ ping 192.168.100.3
 
 ---
 
-**LIVRABLES : captures d'écran des routes des deux machines et de votre nouvelle tentative de ping.**
-
-![](figures/2_ping_default-routes-no-rule)
+Route client
 
 ![](figures/2_route-client.png)
+
+Route serveur
+
 ![](figures/2_route-server.png)
+
+Nouvelle tentative de ping
+
+![](figures/2_ping_default-routes-no-rule.png)
 
 ---
 
@@ -294,9 +300,6 @@ ping 8.8.8.8
 Si votre ping passe mais que la réponse contient un _Redirect Host_, ceci indique que votre ping est passé grace à la redirection ICMP, mais que vous n'arrivez pas encore à contacter l'Internet à travers de Firewall. Ceci est donc aussi valable pour l'instant et accepté comme résultat.
 
 ---
-
-
-**LIVRABLE : capture d'écran de votre ping vers l'Internet. Un ping qui ne passe pas ou des réponses containant des _Redirect Host_ sont acceptés.**o
 
 ![](figures/3_ping_internet_no-rule.png)
 
@@ -377,10 +380,13 @@ Commandes iptables :
 ---
 
 ```bash
-iptables -A FORWARD -s 192.168.200.0/24 -d 192.168.100.0/24 -p icmp --icmp-type 0 -j ACCEPT
-iptables -A FORWARD -s 192.168.200.0/24 -d 192.168.100.0/24 -p icmp --icmp-type 8 -j ACCEPT
-iptables -A FORWARD -s 192.168.100.0/24 -p icmp --icmp-type 8 -j ACCEPT
-iptables -A FORWARD -d 192.168.100.0/24 -p icmp --icmp-type 0 -j ACCEPT
+# ping DMZ -> LAN
+iptables -A FORWARD -s 192.168.200.0/24 -i eth0 -d 192.168.100.0/24 -o eth1 -p icmp --icmp-type 8 -j ACCEPT
+iptables -A FORWARD -s 192.168.100.0/24 -i eth1 -d 192.168.200.0/24 -o eth0 -p icmp --icmp-type 0 -j ACCEPT
+
+# PING LAN -> *
+iptables -A FORWARD -s 192.168.100.0/24 -i eth1 -p icmp --icmp-type 8 -j ACCEPT
+iptables -A FORWARD -d 192.168.100.0/24 -o eth1 -p icmp --icmp-type 0 -j ACCEPT
 ```
 ---
 
@@ -405,7 +411,6 @@ traceroute 8.8.8.8
 
 
 ---
-**LIVRABLE : capture d'écran du traceroute et de votre ping vers l'Internet. Il ne devrait pas y avoir des _Redirect Host_ dans les réponses au ping !**
 
 Ping
 
@@ -457,8 +462,6 @@ ping www.google.com
 
 ---
 
-**LIVRABLE : capture d'écran de votre ping.**
-
 ![](figures/ping_dns_before.png)
 
 ---
@@ -470,7 +473,6 @@ Commandes iptables :
 ---
 
 ```bash
-LIVRABLE : Commandes iptables
 iptables -A FORWARD -i eth1 -s 192.168.100.0/24 -p tcp --dport 53 -j ACCEPT
 iptables -A FORWARD -i eth1 -s 192.168.100.0/24 -p udp --dport 53 -j ACCEPT
 iptables -A FORWARD -o eth1 -d 192.168.100.0/24 -p tcp --sport 53 -j ACCEPT
@@ -486,8 +488,6 @@ iptables -A FORWARD -o eth1 -d 192.168.100.0/24 -p udp --sport 53 -j ACCEPT
 
 ---
 
-**LIVRABLE : capture d'écran de votre ping.**
-
 ![](figures/ping_dns_after.png)
 
 ---
@@ -500,9 +500,7 @@ iptables -A FORWARD -o eth1 -d 192.168.100.0/24 -p udp --sport 53 -j ACCEPT
 ---
 **Réponse**
 
-**LIVRABLE : Votre réponse ici...**
-
-C'est normal, le serveur DNS n'est pas accessible alors le domaine www.google.ch ne peut pas être traduit en IP
+C'est normal, le serveur DNS n'est pas accessible. Le domaine www.google.ch ne peut alors pas être traduit en IP
 
 ---
 
@@ -522,9 +520,8 @@ Commandes iptables :
 ---
 
 ```bash
-LIVRABLE : Commandes iptables
 iptables -A FORWARD -i eth1 -s 192.168.100.0/24 -p tcp -m multiport --dports 80,8080,443 -j ACCEPT
-iptables -A FORWARD -o eth1 -d 192.168.100.0/24 -p tcp -m multiport --sports 8080,443 -j ACCEPT
+iptables -A FORWARD -o eth1 -d 192.168.100.0/24 -p tcp -m multiport --sports 80,8080,443 -j ACCEPT
 ```
 
 ---
@@ -536,10 +533,8 @@ Commandes iptables :
 ---
 
 ```bash
-LIVRABLE : Commandes iptables
-
-iptables -A FORWARD -i eth0 -s 192.168.200.0/24 -p tcp --dport 80 -j ACCEPT
-iptables -A FORWARD -o eth0 -d 192.168.200.0/24 -p tcp --sport 80 -j ACCEPT
+iptables -A FORWARD -i eth0 -s 192.168.200.3/24 -p tcp --dport 80 -j ACCEPT
+iptables -A FORWARD -o eth0 -d 192.168.200.3/24 -p tcp --sport 80 -j ACCEPT
 ```
 
 ---
@@ -551,8 +546,7 @@ iptables -A FORWARD -o eth0 -d 192.168.200.0/24 -p tcp --sport 80 -j ACCEPT
 
 ---
 
-**LIVRABLE : capture d'écran.**
-
+![](figures/wget_lan-to-dmz.png)
 
 ---
 
@@ -569,10 +563,11 @@ Commandes iptables :
 ---
 
 ```bash
-LIVRABLE : Commandes iptables
-iptables -A INPUT -s 192.168.100.0/24 -p tcp --dport 22 -j ACCEPT
+# SSH Firewall
+iptables -A INPUT -s 192.168.100.0/24  -p tcp --dport 22 -j ACCEPT
 iptables -A OUTPUT -d 192.168.100.0/24 -p tcp --sport 22 -j ACCEPT
 
+# SSH Serveur
 iptables -A FORWARD -s 192.168.100.0/24 -i eth1 -d 192.168.200.3/24 -o eth0 -p tcp --dport 22 -j ACCEPT
 iptables -A FORWARD -s 192.168.200.3/24 -i eth0 -d 192.168.100.0/24 -o eth1 -p tcp --sport 22 -j ACCEPT
 ```
@@ -587,7 +582,7 @@ ssh root@192.168.200.3
 
 ---
 
-**LIVRABLE : capture d'écran de votre connexion ssh.**
+![](figures/ssh_connected.png)
 
 ---
 
@@ -598,8 +593,6 @@ ssh root@192.168.200.3
 
 ---
 **Réponse**
-
-**LIVRABLE : Votre réponse ici...**
 
 SSH permet de se connecter sur une machine de manière chiffrée, ce qui permet la maintenance facile de la machine distante.
 
@@ -614,9 +607,7 @@ SSH permet de se connecter sur une machine de manière chiffrée, ce qui permet 
 ---
 **Réponse**
 
-**LIVRABLE : Votre réponse ici...**
-
-Utiliser le port exact et le bon protocole pour SSH, car par exemple le port 22/UDP n'est pas SSH
+Définir à l'avance qui peut se connecter au SSH, car il ne faut pas laisser l'accès à n'importe quel réseau/IP.
 
 ---
 
@@ -631,6 +622,6 @@ A présent, vous devriez avoir le matériel nécessaire afin de reproduire la ta
 
 ---
 
-**LIVRABLE : capture d'écran avec toutes vos règles.**
+![](figures/iptables-final.png)
 
 ---
